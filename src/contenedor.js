@@ -1,9 +1,5 @@
 const fs = require("fs");
 
-function isEmptyObject(obj) {
-	return !Object.keys(obj).length;
-}
-
 class Contenedor {
 	constructor(ruta) {
 		this.ruta = ruta;
@@ -12,14 +8,11 @@ class Contenedor {
 	}
 	async getAll() {
 		try {
-			const contenido = await fs.promises.readFile(
-				this.ruta,
-				(err, data) => data
-			);
+			const contenido = await fs.promises.readFile(this.ruta);
 			const parsed = JSON.parse(contenido);
 			return parsed;
 		} catch (error) {
-			if (error.errno === -4058) {
+			if (error) {
 				await fs.promises.writeFile(this.ruta, "[]");
 			} else {
 				console.log(error);
@@ -50,7 +43,7 @@ class Contenedor {
 			const objetos = await this.getAll();
 			console.log("carts", objetos);
 
-			return objetos.find((objeto) => objeto.id.toString() === id) || null;
+			return objetos.find((objeto) => objeto.id.toString() === id);
 		} catch (error) {
 			return null;
 		}
@@ -58,7 +51,7 @@ class Contenedor {
 	async deleteById(id) {
 		try {
 			const objetos = await this.getAll();
-			const newArray = objetos.filter((objeto) => objeto.id.toString() !== id);
+			const newArray = objetos.filter((objeto) => objeto.id !== id);
 			console.log("newArray", newArray);
 			await fs.promises.writeFile(this.ruta, JSON.stringify(newArray, null, 2));
 			return newArray;
@@ -111,16 +104,15 @@ class Contenedor {
 			return null;
 		}
 	};
-	async saveCart() {
+	async saveCart(carrito) {
 		console.log("SaveCart");
 		let carrito = {};
 		try {
 			this.carritos = await this.getAll();
-			if (isEmptyObject(this.carritos)) {
+			if (this.productos.length === 0) {
 				carrito.id = 1;
 				(carrito.timestamp = Date.now()), (carrito.productos = []);
 			} else {
-				console.log("thiscarro", this.carritos);
 				(carrito.id = this.carritos[this.carritos.length - 1].id + 1),
 					(carrito.timestamp = Date.now()),
 					(carrito.productos = []);
