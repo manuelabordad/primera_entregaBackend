@@ -11,12 +11,9 @@ class Contenedor {
 			const contenido = await fs.promises.readFile(this.ruta);
 			const parsed = JSON.parse(contenido);
 			return parsed;
-		} catch (error) {
-			if (error) {
-				await fs.promises.writeFile(this.ruta, "[]");
-			} else {
-				console.log(error);
-			}
+		} catch (err) {
+			await fs.promises.writeFile(this.ruta, "[]");
+			throw console.error(err);
 		}
 	}
 	async save(producto) {
